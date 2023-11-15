@@ -1,149 +1,115 @@
 #include <iostream>
 #include <string>
 
-int addchars(char c1, char c2, char c3);
-std::string addlines(std::string l1, std::string l2);
-std::string revstr(std::string l);
-std::string getridoffirstzeros(std::string l);
+std::string numtocell(double n);
+std::string revbin_str(std::string l);
+std::string dectobin_str(long long n);
+std::string fracparttobin_str(double n);
 
 int main() {
-	std::string n1, n2;
-	std::getline(std::cin, n1);
-	std::getline(std::cin, n2);
+	double n;
+	std::cin >> n;
+	std::cout << numtocell(n);
 
-	std::cout << addlines(n1, n2);
 	return 0;
 }
-std::string addlines(std::string l1, std::string l2) {
-	if (l1 == "0" && l2 == "0") return "0";
+std::string numtocell(double n) {
+	bool isNegative = n < 0;
+	if (isNegative) n *= -1;
 
-	l1 = revstr(l1);
-	l2 = revstr(l2);
+	double dPart;
+	long long llPart;
 
-	std::string res;
-	int s1, s2, j = 0;
-	s1 = l1.size();
-	s2 = l2.size();
+	llPart = (long long)n;
+	dPart = n - (double)llPart;
 
-	char ost = '0';
-	if (s1 >= s2) {
-		for (int i = 0; j < s2; j++) {
-			int r = addchars(l1[j], l2[j], ost);
+	std::string llPartDec_str = dectobin_str(llPart), dPartDec_str = fracparttobin_str(dPart);
+	std::string order, mantissa, res;
+	int step;
 
-			if (r == 0) {
-				res += '0';
-				ost = '0';
-			}
-			else if (r == 1) {
-				res += '1';
-				ost = '0';
-			}
-			else if (r == 2) {
-				res += '0';
-				ost = '1';
-			}
-			else {
-				res += '1';
-				ost = '1';
-			}
+	if (n >= 1) {
+		step = llPartDec_str.size() + 126;
 
-
+		for (int i = 1; llPartDec_str[i] != '\0'; i++) {
+			mantissa += llPartDec_str[i];
 		}
-		for (int i = j; i < s1; i++) {
-			int r = addchars(l1[i], ost, '0');
-
-			if (r == 0) {
-				res += '0';
-				ost = '0';
-			}
-			else if (r == 1) {
-				res += '1';
-				ost = '0';
-			}
-			else if (r == 2) {
-				res += '0';
-				ost = '1';
-			}
-			else {
-				res += '1';
-				ost = '1';
-			}
-		}
-		res += ost;
+		mantissa += dPartDec_str;
 	}
 	else {
-		for (int i = 0; j < s1; j++) {
-			int r = addchars(l1[j], l2[j], ost);
-
-			if (r == 0) {
-				res += '0';
-				ost = '0';
-			}
-			else if (r == 1) {
-				res += '1';
-				ost = '0';
-			}
-			else if (r == 2) {
-				res += '0';
-				ost = '1';
-			}
-			else {
-				res += '1';
-				ost = '1';
-			}
-
-
+		step = 0;
+		while (dPartDec_str[step] != '1') {
+			step++;
 		}
-		for (int i = j; i < s2; i++) {
-			int r = addchars(l2[i], ost, '0');
+		step = -(step + 1) + 127;
 
-			if (r == 0) {
-				res += '0';
-				ost = '0';
-			}
-			else if (r == 1) {
-				res += '1';
-				ost = '0';
-			}
-			else if (r == 2) {
-				res += '0';
-				ost = '1';
-			}
-			else {
-				res += '1';
-				ost = '1';
-			}
+		bool start = false;
+		for (int i = 0; dPartDec_str[i] != '\0'; i++) {
+			char cc = dPartDec_str[i];
+
+			if (!start && cc == '1') start = true;
+			if (start) mantissa += cc;
 		}
-		res += ost;
+	}
+	order = dectobin_str(step);
+	int ras = 8 - order.size();
+	for (int i = 0; i < ras; i++) {
+		order = '0' + order;
 	}
 
-	res = revstr(res);
-	res.pop_back();
-	res = getridoffirstzeros(res);
+	ras = 23 - mantissa.size();
+	for (int i = 0; i < ras; i++) {
+		mantissa += '0';
+	}
+
+	res += '0' + (int)isNegative;
+	res += order;
+	res += mantissa;
 	return res;
 }
-int addchars(char c1, char c2, char c3) {
-	std::string n = { c1, c2, c3 };
-	
-	return std::count(n.begin(), n.end(), '1');
-}
-std::string revstr(std::string l) {
-	std::string res;
-	int s = l.size();
-	for (int i = 0; i <= s; i++) {
-		char cc = l[s - i];
-		res += cc;
+std::string fracparttobin_str(double n) {
+	std::string res = "";
+	int i = 0;
+
+	while (i < 23) {
+		i++;
+		n *= 2;
+
+		if (n > 1) {
+			res += '1';
+			n -= 1.0;
+		}
+		else if (n == 1) {
+			res += '1';
+			break;
+		}
+		else {
+			res += '0';
+		}
 	}
 	return res;
 }
-std::string getridoffirstzeros(std::string l) {
-	std::string res;
-	bool start = false;
-	int s = l.size();
-	for (int i = 0; i < s; i++) {
-		char cc = l[i];
-		if (!start && cc == '1') start = true;
-		if (start) res += cc;
+std::string revbin_str(std::string l) {
+	std::string res = "";
+
+	for (int i = 0; i < l.size(); i++) {
+		if (l[i] == '1') res += '0';
+		else if (l[i] == '0') res += '1';
 	}
+
 	return res;
+}
+std::string dectobin_str(long long n) {
+	if (n < 0) n *= -1;
+
+	if (n == 0) return "0";
+
+	std::string l = "";
+	while (n) {
+		int d = n % 2;
+		n /= 2;
+
+		if (d == 1) l = '1' + l;
+		else l = '0' + l;
+	}
+	return l;
 }
