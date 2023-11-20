@@ -46,9 +46,10 @@ std::string numtocell(double n) {
 		for (int i = 0; dPartDec_str[i] != '\0'; i++) {
 			char cc = dPartDec_str[i];
 
-			if (!start && cc == '1') start = true;
 			if (start) mantissa += cc;
+			if (!start && cc == '1') start = true;
 		}
+		std::cout << mantissa << std::endl;
 	}
 	order = dectobin_str(step);
 	int ras = 8 - order.size();
